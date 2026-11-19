@@ -1,0 +1,6 @@
+{
+  "key": "<indexnow-key>",
+  "keyLocation": "https://global-network.datasteg.com/<indexnow-key>.txt",
+  "created": "2026-11-02",
+  "note": "IndexNow record. The key file is served from app/public (not part of this snapshot; the key above is a placeholder), and the sitemap's URLs (at most 100) are submitted to api.indexnow.org after a successful deploy. Rotating the key means a new file in app/public and this record."
+}

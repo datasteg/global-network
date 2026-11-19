@@ -1,0 +1,163 @@
+# Stress signals (memo docs/methodology/stress-v1.0.md).
+# Phase S0: everything below was written down before scripts/stress.py ran its first validation. The rules are data:
+# scripts/stress.py computes them, app/components/stress/model.ts re-applies thresholds, K and on/off in the browser.
+# Changing a threshold candidate list, a composite design or an expectation after a validation run is a new method
+# version (stress 1.1), written in the memo with the reason.
+version: "1.0"
+written: "2026-11-03"
+
+# The count: a signal fires at its threshold; the count is the number fired among the scored signals; the reading
+# "K or more" is the default view.
+K: 3
+K_range: [1, 7]
+
+# Trade window for a board quarter: the 12-month window ending in the quarter's last month. If the economy's window for
+# that month is below trade-flow's completeness rule (0.9), the newest complete window up to `max_lag` months earlier
+# is used and the cell is marked "partial, to <month>" (G2: no cross-period total is hidden).
+trade_max_lag: 6
+
+# Own-history and level scoring, as money-flow method 1.3 (rules.py robust_z, level_signal).
+min_history: 8      # quarters before an own-history signal or an own percentile is shown
+min_pool: 40        # economy-quarters the pooled distribution needs before a level is ranked
+z_cap: 3.0
+
+# Threshold selection for rules whose threshold comes from validation: candidates written here; each candidate is
+# scored by Youden's J (hit rate on funding episodes minus false-signal rate in calm quarters) on the training span;
+# the best wins, ties go to the stricter candidate (listed first). The 2021-2026 quarters are the hold-out.
+train_to: "2020-12-31"
+
+rules:
+  j1:
+    en: Import cover
+    ko: 수입 지급 여력
+    unit: { en: months, ko: 개월 }
+    formula: net reserves ÷ (12-month imports ÷ 12)
+    money: { en: "Net reserves (IRFCL Section I plus the predetermined drains of Section II), not floored: they can be negative", ko: "순외환보유액(IRFCL 섹션 I에 섹션 II의 사전 확정 유출을 반영)입니다. 하한을 두지 않아 음수가 될 수 있습니다.", src: money-flow board res_net_raw }
+    trade: { en: "12-month imports", ko: "12개월 수입", src: trade-flow series/W TOTAL m }
+    dir: low            # lower is worse
+    threshold: 3
+    threshold_from: convention   # three months of imports, the oldest reserve-adequacy rule
+    slider: [1, 12, 0.5]
+    scope: a2_scored    # not scored for euro members and reserve-currency issuers, as A2 is not
+    floor: 1.0          # own-history scale floor, months
+    not_meaningful_below_gross_pct: 1   # net reserves at or below zero, or under 1% of gross reserves: J1 is null, "not meaningful"
+    channel: both
+    single: { money: { key: res_gdp, dir: low, en: "Net reserves, % of GDP", ko: "순외환보유액, GDP 대비 %" }, trade: { key: m_gdp, dir: high, en: "12-month imports, % of GDP", ko: "12개월 수입, GDP 대비 %" } }
+  j2:
+    en: Financing need over export earnings
+    ko: 수출 대비 대외 자금 수요
+    unit: { en: "% of exports", ko: "수출 대비 %" }
+    formula: (BIS banks' claims due within a year + max(0, current-account deficit)) ÷ 12-month goods exports as partners record them
+    money: { en: "BIS banks' claims due within a year on the economy (board st) and the current-account deficit (board CA × GDP)", ko: "이 경제가 BIS 보고은행에 진 채무 가운데 잔존만기 1년 이내분(신호판 st)과 경상수지 적자(신호판 CA × GDP)입니다.", src: money-flow board st, ca, gdp }
+    trade: { en: "12-month goods exports as partners record them", ko: "상대국 기록 기준 12개월 상품수출", src: trade-flow series/W TOTAL x }
+    dir: high
+    threshold_from: validation
+    candidates: [150, 125, 100, 75, 50]   # 100 = a year of exports, the first candidate
+    slider: [20, 300, 5]
+    floor: 10.0
+    channel: funding
+    single: { money: { key: need_gdp, dir: high, en: "Financing need, % of GDP", ko: "대외 자금 수요, GDP 대비 %" }, trade: { key: x_gdp, dir: low, en: "12-month exports, % of GDP", ko: "12개월 수출, GDP 대비 %" } }
+  j3:
+    en: Double hit
+    ko: 이중 충격
+    unit: { en: "score 0–100", ko: "점수 0–100" }
+    formula: fires when F < 0 and export momentum is at or below its own 20th percentile; score = ½(100 − F percentile) + ½(100 − momentum percentile)
+    money: { en: "Funding flow score F (money-flow board), own-history percentile", ko: "자금 흐름 점수 F (money-flow 신호판), 자기 이력 백분위" , src: money-flow board flow }
+    trade: { en: "Export momentum (12-month exports against a year earlier), own-history percentile", ko: "수출 모멘텀 (12개월 수출 전년동기대비), 자체 이력 백분위", src: trade-flow series/W TOTAL x }
+    dir: high
+    fire: { f_below: 0, mom_pct_at_most: 20 }
+    threshold_from: definition
+    floor: 10.0
+    channel: funding
+    single: { money: { key: f_inv, dir: high, en: "Funding flow F, inverted own percentile", ko: "자금 흐름 F, 자기 백분위 역부호" }, trade: { key: mom_inv, dir: high, en: "Export momentum, inverted own percentile", ko: "수출 모멘텀, 자기 백분위 역부호" } }
+  j4:
+    en: Partner stress imported through trade
+    ko: 교역을 통해 전이되는 상대국 스트레스
+    unit: { en: "V points", ko: "V 점" }
+    formula: Σ_j w_ij · V_j, w = exports to j ÷ exports to all covered partners
+    money: { en: "Partners' vulnerability score V (money-flow board); the United States counts as V = 0", ko: "상대국의 취약성 점수 V (money-flow 신호판), 미국은 V = 0", src: money-flow board v }
+    trade: { en: "Destination shares of 12-month exports (trade-flow snapshots)", ko: "12개월 수출의 수출처별 비중 (trade-flow 스냅숏)", src: trade-flow snap/W/TOTAL w12 }
+    dir: high
+    threshold_from: validation
+    candidates: { pooled_pct: [90, 85, 80, 75] }
+    slider: [20, 80, 1]
+    min_coverage: 50    # % of exports to covered partners (board economies and the United States)
+    us_v: 0             # the United States, the hub, counts as V = 0
+    floor: 5.0
+    channel: trade
+    single: { money: { key: v_world, dir: high, en: "Average V of the other board economies, unweighted", ko: "다른 신호판 경제의 V 단순 평균" }, trade: { key: hhi_dest, dir: high, en: "Concentration of export destinations (HHI)", ko: "수출처 집중도(HHI)" } }
+  j5:
+    en: Dual dependence
+    ko: 이중 의존
+    unit: { en: "% overlap", ko: "중첩 %" }
+    formula: Σ_j min(lender share_ij, destination share_ij)
+    money: { en: "Creditor shares of bank claims on the economy (BIS LBS, by quarter)", ko: "그 경제에 대한 은행 청구권의 채권국별 비중 (BIS LBS, 분기)", src: money-flow links bis.LBS }
+    trade: { en: "Destination shares of 12-month exports", ko: "12개월 수출의 수출처별 비중", src: trade-flow snap/W/TOTAL w12 }
+    dir: high
+    threshold_from: validation
+    candidates: { pooled_pct: [90, 85, 80, 75] }
+    slider: [0, 60, 1]
+    floor: 3.0
+    channel: both
+    single: { money: { key: hhi_lend, dir: high, en: "Concentration of bank lenders (HHI)", ko: "은행 차입 상대국 집중도(HHI)" }, trade: { key: hhi_dest, dir: high, en: "Concentration of export destinations (HHI)", ko: "수출처 집중도(HHI)" } }
+  j6:
+    en: Dollar channel
+    ko: 달러 경로
+    unit: { en: "% of exports", ko: "수출 대비 %" }
+    formula: −(slope of export growth on the dollar index two quarters earlier, pooled in the economy's A1 tercile) × 4-quarter change of the broad dollar index
+    money: { en: "FX credit A1 (money-flow board) for the tercile; the broad dollar index (money-flow signals)", ko: "외화신용 A1 (money-flow 신호판, 3분위), 광의 달러 지수 (money-flow signals)", src: money-flow board a1, signals dollar_index }
+    trade: { en: "Export growth two quarters after each dollar move (the slope)", ko: "달러 변동 두 분기 뒤 수출 증가율 (기울기)", src: trade-flow series/W TOTAL x }
+    dir: high
+    threshold_from: validation
+    candidates: [4, 3, 2, 1]   # 2 % of exports is the first candidate
+    slider: [0, 10, 0.5]
+    lag: 2
+    min_points: 24      # pooled points a tercile slope needs before J6 is scored
+    clip: 40            # export growth clipped to ±40 points before the slope (added after the first run: the pooled growth
+                        # points run to +883% at the 99th percentile where an economy's reporting coverage jumps; memo section 4)
+    floor: 0.5
+    channel: trade
+    single: { money: { key: a1_dollar, dir: high, en: "A1 × rise of the dollar index", ko: "A1 × 달러지수 상승률" }, trade: { key: mom_inv, dir: high, en: "Export momentum, inverted own percentile", ko: "수출 모멘텀, 자기 백분위 역부호" } }
+  j7:
+    en: Commodity earnings against buffers
+    ko: 원자재 수출과 완충력
+    unit: { en: "points", ko: "점" }
+    formula: commodity share of exports (HS 25–27, the year before the quarter) × buffer weakness ÷ 100 (money-flow's buffer half of V, where 100 = the thinnest buffers; the plan's 1 − buffer strength)
+    money: { en: "Buffer half of V (net IIP and current account, money-flow board buf)", ko: "V의 완충 부분 (순대외금융자산과 경상수지, money-flow 신호판 buf)", src: money-flow board buf }
+    trade: { en: "Commodity share of exports, HS chapters 25–27 (trade-flow annual)", ko: "수출 중 원자재 비중, HS 25–27류 (trade-flow 연간)", src: trade-flow nodes/A HS-25..27 }
+    dir: high
+    threshold_from: validation
+    candidates: { pooled_pct: [90, 85, 80, 75] }
+    slider: [0, 60, 1]
+    floor: 2.0
+    channel: trade
+    single: { money: { key: buf_inv, dir: high, en: "Buffer weakness (100 − buffer score)", ko: "완충력 취약도(100 − 완충 점수)" }, trade: { key: com, dir: high, en: "Commodity share of exports", ko: "수출 중 원자재 비중" } }
+
+# "Channel first": the leading fired signal's channel; with none fired, the highest-ranked signal's.
+channels: { funding: [j2, j3], trade: [j4, j6, j7], both: [j1, j5] }
+
+# The composite (G19). A signal enters only if its AUROC beats the better of its two single-side inputs with a 90%
+# bootstrap interval of the difference above zero. Designs written before validation; the first that passes (its
+# interval's lower bound above V alone on the same positives) is published; if none passes, no composite is shown.
+composite:
+  admission: { level: 90, draws: 1000, seed: 20261103 }
+  designs:
+    - { id: D1, en: "Half level rank, half own-history robust z, mean of admitted signals (the plan's design)", ko: "수준 순위 절반, 자기 이력 강건 z 절반, 채택 신호의 평균", level: 0.5 }
+    - { id: D2, en: "Level rank only, mean of admitted signals", ko: "수준 순위만, 채택 신호의 평균", level: 1.0 }
+    - { id: D3, en: "Own-history robust z only, mean of admitted signals", ko: "자기 이력 강건 z만, 채택 신호의 평균", level: 0.0 }
+  min_share: 0.5    # a composite needs at least half the admitted signals scored that quarter
+
+validation:
+  funding: { source: "money-flow episodes/global", decides: true }
+  fiscal: { source: "money-flow sovereign/global spells", pre_years: [1, 3], calm_gap: 3, global_years: [2008, 2009, 2020], decides: false }
+  trade: { source: "global-network shock replays (summary export falls)", decides: false, perms: 2000 }
+
+# Expectations (S0), checked by the build and printed pass or fail on the method tab and in the build log.
+expectations:
+  - { id: E1, kind: count_at_least, eco: KOR, q: "2008-09-30", n: 3, en: "Korea's count is 3 or more in 2008 Q3", ko: "한국의 신호 수는 2008년 3분기에 3 이상" }
+  - { id: E2, kind: count_at_least, eco: TUR, q: "2018-06-30", n: 3, en: "Türkiye's count is 3 or more in 2018 Q2", ko: "튀르키예의 신호 수가 2018년 2분기에 3 이상" }
+  - { id: E3, kind: count_at_least, eco: ARG, q: "2018-03-31", n: 3, en: "Argentina's count is 3 or more in 2018 Q1", ko: "아르헨티나의 신호 수는 2018년 1분기에 3 이상" }
+  - { id: E4, kind: count_at_least, eco: RUS, q: "2014-12-31", n: 3, en: "Russia's count is 3 or more in 2014 Q4", ko: "러시아의 신호 수가 2014년 4분기에 3 이상" }
+  - { id: E5, kind: count_at_most_span, eco: CZE, from: "2017-03-31", to: "2019-12-31", n: 1, en: "Czechia's count is 1 or less through 2017–2019", ko: "체코의 신호 수는 2017–2019년 내내 1 이하" }
+  - { id: E6, kind: fires_in_years, eco: SAU, rule: j7, years: [2015, 2020], en: "Saudi Arabia's J7 fires in 2015 and in 2020", ko: "사우디아라비아의 J7은 2015년과 2020년에 기준 도달" }
+  - { id: E7, kind: j4_leads_v, eco: [HUN, POL], q0: "2008-06-30", q1: "2008-09-30", en: "J4 for Hungary and Poland rises in 2008 Q3 while their own V does not yet", ko: "헝가리와 폴란드의 J4는 2008년 3분기에 상승하고 자기 V는 아직 상승하지 않음" }

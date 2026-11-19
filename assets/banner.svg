@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320" role="img" aria-labelledby="t d">
+  <title id="t">global-network</title>
+  <desc id="d">Banner in the Oreum design system: Hyeopjae sand page, basalt ink, an oreum in tangerine over a basalt ridge, the sea for money and tangerine for trade, a canola band for a shock.</desc>
+  <!-- Oreum tokens (design/tokens.css): sand #F5F2EA, basalt #1C1F21, ink-2 #4B5154, ink-3 #6F7679,
+       sea #0B6B86, viz-money-2 #7FB5C6, tangerine #E07B22, viz-trade-2 #F0B27A, oreum #3E7A4A, camellia #B5333B,
+       canola #E9C23A, viz-grid #E4DFD3 -->
+  <rect width="1280" height="320" fill="#F5F2EA"/>
+  <rect x="0" y="0" width="1280" height="6" fill="#1C1F21"/>
+
+  <!-- the chart: a canola shock band, grid, the money lane (sea) and the trade lane (tangerine) -->
+  <g transform="translate(640 44)">
+    <rect x="270" y="0" width="58" height="176" fill="#E9C23A" fill-opacity="0.22"/>
+    <line x1="270" y1="0" x2="270" y2="176" stroke="#E9C23A" stroke-width="1" stroke-dasharray="2 3"/>
+    <g stroke="#E4DFD3" stroke-width="1">
+      <line x1="0" y1="20" x2="600" y2="20"/><line x1="0" y1="64" x2="600" y2="64"/>
+      <line x1="0" y1="108" x2="600" y2="108"/><line x1="0" y1="152" x2="600" y2="152"/>
+    </g>
+    <polyline fill="none" stroke="#7FB5C6" stroke-width="1.5" stroke-linejoin="round"
+      points="0,118 40,112 80,116 120,104 160,100 200,92 240,96 280,128 320,138 360,120 400,108 440,100 480,94 520,86 560,90 600,80"/>
+    <polyline fill="none" stroke="#0B6B86" stroke-width="2.5" stroke-linejoin="round"
+      points="0,96 40,90 80,84 120,88 160,76 200,70 240,64 280,104 320,122 360,98 400,84 440,78 480,70 520,60 560,64 600,52"/>
+    <polyline fill="none" stroke="#F0B27A" stroke-width="1.5" stroke-linejoin="round"
+      points="0,74 40,78 80,70 120,66 160,72 200,62 240,58 280,96 320,112 360,82 400,70 440,64 480,58 520,62 560,50 600,46"/>
+    <polyline fill="none" stroke="#E07B22" stroke-width="2.5" stroke-linejoin="round"
+      points="0,52 40,48 80,54 120,44 160,40 200,36 240,30 280,70 320,92 360,60 400,46 440,40 480,34 520,30 560,26 600,22"/>
+    <circle cx="600" cy="52" r="4.5" fill="#0B6B86"/>
+    <circle cx="600" cy="22" r="4.5" fill="#E07B22"/>
+  </g>
+
+  <!-- the oreum: a tangerine cone over a basalt ridge, the island's mark drawn large -->
+  <g transform="translate(640 180) scale(27.5 6.4)">
+    <path d="M0 21 C4 13, 7 11, 9.5 11 C11 11, 12 12.5, 13.5 13 C16 9, 18.5 8, 23.3 21 Z" fill="#E07B22"/>
+    <path d="M0 21 C3 16, 5 15, 7 15 C9 15, 10.5 17, 12.5 17.5 C14 16, 15.5 15.5, 17 16 C19 16.5, 21 18, 23.3 21 Z" fill="#1C1F21" opacity="0.92"/>
+  </g>
+  <!-- the sea off Seongsan at the island's foot -->
+  <path d="M600 314 L600 302 C660 296, 720 306, 780 300 S900 294, 960 300 S1080 308, 1140 300 S1240 296, 1280 299 L1280 314 Z" fill="#0B6B86"/>
+  <path d="M600 306 C660 301, 720 310, 780 305 S900 300, 960 305 S1080 312, 1140 305 S1240 301, 1280 304" fill="none" stroke="#7FB5C6" stroke-width="1.2"/>
+
+  <rect x="0" y="314" width="1280" height="6" fill="#1C1F21"/>
+  <!-- words -->
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+    <text x="64" y="84" font-size="13" font-weight="600" letter-spacing="2.2" fill="#6F7679">DATASTEG · OREUM</text>
+    <text x="62" y="148" font-family="Georgia, 'Times New Roman', Times, serif" font-size="64" font-weight="600" letter-spacing="-0.5" fill="#1C1F21">global-network</text>
+    <text x="64" y="190" font-size="20" fill="#4B5154">Funding and trade, economy by economy,</text>
+    <text x="64" y="218" font-size="20" fill="#4B5154">at their own periods, in English and Korean</text>
+    <g font-size="13.5" fill="#4B5154">
+      <circle cx="70" cy="261" r="6" fill="#0B6B86"/><text x="84" y="266">money</text>
+      <circle cx="150" cy="261" r="6" fill="#E07B22"/><text x="164" y="266">trade</text>
+      <circle cx="226" cy="261" r="6" fill="#3E7A4A"/><text x="240" y="266">inflow, pass</text>
+      <circle cx="342" cy="261" r="6" fill="#B5333B"/><text x="356" y="266">withdrawal, fail</text>
+      <rect x="474" y="254" width="14" height="14" fill="#E9C23A" fill-opacity="0.45" stroke="#E9C23A"/><text x="496" y="266">shock</text>
+    </g>
+  </g>
+</svg>

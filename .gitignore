@@ -1,0 +1,14 @@
+# built data (derived results are served by the site, never committed)
+data/
+# dependencies and build output
+app/node_modules/
+app/.next*/
+app/next-env.d.ts
+app/tsconfig.tsbuildinfo
+__pycache__/
+.venv/
+# local environment
+.env
+.env.*
+!.env.example
+.DS_Store

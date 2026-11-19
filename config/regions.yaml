@@ -1,0 +1,26 @@
+# Region groups for the Overview chart's filters. Read by scripts/build.py (build_earn) into earn.json `groups`.
+#
+# The base is the UN M49 geoscheme that trade-flow's nodes carry (region, subregion); this file only folds it into the
+# four groups the chart offers. A subregion rule wins over a region rule; `economies` pins a single economy. The euro
+# area sub-group comes from money-flow's board (`euro_from`), advanced vs emerging from money-flow's board groups
+# (the BIS advanced-economy list), and borrower from the Signal Board set (the 36; the US hub is the only other).
+groups:
+  apac:
+    en: Asia-Pacific
+    ko: 아시아·태평양
+    regions: [Oceania]
+    subregions: [Eastern Asia, South-eastern Asia, Southern Asia, Central Asia]
+  europe:
+    en: Europe
+    ko: 유럽
+    regions: [Europe]
+  americas:
+    en: Americas
+    ko: 미주
+    regions: [Americas]
+  mea:
+    en: Middle East and Africa
+    ko: 중동·아프리카
+    regions: [Africa]
+    subregions: [Western Asia]
+economies: {}

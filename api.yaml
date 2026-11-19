@@ -1,0 +1,91 @@
+# global-network's views for the datasteg API and MCP service (api/docs/SVC-CONTRACT.md). The handlers are
+# app/app/svc/v1/**/route.ts over lib/svc-views/*.ts; each returns only what one page draws, read through lib/data.ts.
+# Check: uv run api/scripts/svc_check.py --base http://127.0.0.1:<port> --manifest global-network/api.yaml
+id: global-network
+title: global-network
+summary: For each economy, where its funding comes from and where its goods go, joined from money-flow (BIS, IMF) and trade-flow (UN Comtrade), with shock replays and stress signals.
+site: https://global-network.datasteg.com
+internal: http://global-network:8080
+status: live
+surface: "1.0"
+contract: "1.1"                    # every answer has period and basis (each number's measure id and period)
+hooks: [search, item, economy, economies]
+item_kinds: [country, pair, shock, stress]
+search_example: korea
+item_example: "country:KOR"
+views:
+  - id: country
+    path: /countries/{iso3}
+    summary: One economy's country sheet - funding (V, F, A2, net reserves, net IIP, bank lenders) at money-flow's board quarter and goods trade (12-month totals as partners record them, partners, HS chapters, chokepoints) at the newest window and at the window joined with the funding quarter, with the stress strip and the bank and bond withdrawal replay; every number's measure and period in basis.
+    params:
+      iso3: { in: path, type: string, pattern: "^[A-Z]{3}$", description: "ISO 3166-1 alpha-3 code of one of the 36 board economies or USA, such as KOR" }
+      part: { type: string, enum: [sheet, funding, trade], default: sheet, description: "sheet: both sections; funding: adds V and F by quarter since 2005; trade: adds 12-month exports and imports by month since 2006" }
+    table: true
+    max_bytes: 60000
+    example: { iso3: KOR }
+
+  - id: pair
+    path: /pairs/{a}/{b}
+    summary: Goods, bank loans and deposits, portfolio holdings and direct investment between two economies, both directions, each at its own period (goods over each exporter's own window), and the finance-to-trade ratio at the last quarter of its history; optionally one channel through time.
+    params:
+      a: { in: path, type: string, pattern: "^[A-Z]{3}$", description: "First economy, ISO alpha-3 (36 board economies or USA), such as KOR" }
+      b: { in: path, type: string, pattern: "^[A-Z]{3}$", description: "Second economy, ISO alpha-3, different from a, such as USA" }
+      history: { type: string, enum: [none, goods, bank, portfolio, fdi, ratio], default: none, description: "One lane of the pair's time chart as a table: goods (monthly 12-month windows), bank (quarterly), portfolio (half-yearly), fdi (annual), ratio (finance to trade, quarterly)" }
+      since: { type: integer, minimum: 2006, maximum: 2100, default: 2006, description: "First year of the history lane" }
+    table: true
+    max_bytes: 60000
+    example: { a: KOR, b: USA }
+    tool:
+      name: global_network_pair
+      title: Money and trade links between two economies
+      description: >-
+        Goods exports both ways (12 months as partners record them, UN Comtrade via trade-flow), bank loans and
+        deposits (BIS LBS), portfolio holdings (IMF PIP) and direct investment (IMF DIP) between two economies, each
+        at its own period, and the finance-to-trade ratio with its quarter. history gives one channel since 2006.
+        Economies: 36 board economies and USA, ISO alpha-3.
+
+  - id: shocks
+    path: /shocks
+    summary: The shock replays (COVID-19 2020, the Iran war 2026, the 2008 crisis, Russia-Ukraine 2022) with their shock months.
+    params: {}
+    table: true
+    max_bytes: 20000
+    example: {}
+
+  - id: shock
+    path: /shocks/{id}
+    summary: One shock replay - three waves of trade falls month by month, who was hit and whether funding cushioned it, medians by how economies earn, the stress count before; or its network, or the dollar strips.
+    params:
+      id: { in: path, type: string, pattern: "^[a-z0-9-]{1,40}$", description: "Replay id: covid-2020, iran-war-2026, gfc-2008 or russia-ukraine-2022 (GET /shocks lists them)" }
+      economy: { type: string, pattern: "^[A-Z]{3}$", description: "Optional ISO alpha-3 code: focus the summary or the network on one economy" }
+      part: { type: string, enum: [summary, network, dollar], default: summary, description: "summary: waves and the who-was-hit table; network: the economies and trade links the map draws, monthly; dollar: the weekly broad dollar index and Fed swap lines" }
+    table: true
+    max_bytes: 60000
+    example: { id: covid-2020 }
+    tool:
+      name: global_network_shock
+      title: Replay a past shock through trade and funding
+      description: >-
+        Replays a shock (covid-2020, iran-war-2026, gfc-2008, russia-ukraine-2022) month by month through trade links:
+        the origin's exports, its direct importers, their third markets (UN Comtrade via trade-flow), with each board
+        economy's worst export fall and funding flow score F before and after (money-flow). Observed, not causal. Give
+        economy to focus on one.
+
+  - id: stress
+    path: /stress
+    summary: The seven stress signals J1-J7 (each a funding quantity against a trade quantity) for one economy by quarter since 2005, or for all 36 board economies at one quarter with each economy's trade window and partial flag; J1 null when net reserves are not positive; no composite under rule G19.
+    params:
+      economy: { type: string, pattern: "^[A-Z]{3}$", description: "Optional ISO alpha-3 code of a board economy, such as KOR; without it, the board of 36 economies" }
+      quarter: { type: string, pattern: "^\\d{4}-(Q[1-4]|\\d{2}-\\d{2})$", description: "Optional quarter, 2026-Q2 or 2026-06-30 (default: the latest)" }
+      inputs: { type: boolean, default: false, description: "With economy: add each signal's money and trade input to the quarterly table" }
+    table: true
+    max_bytes: 60000
+    example: { economy: KOR }
+    tool:
+      name: global_network_stress
+      title: Stress signals from funding and trade
+      description: >-
+        Seven stress signals (import cover on net reserves, financing need from BIS banks' claims due within a year
+        over goods exports, double hit, partner stress, dual dependence, dollar channel, commodities against buffers)
+        with thresholds, which fire, V, F and each trade window. One economy since 2005, or all 36 at a quarter. No
+        composite (rule G19).

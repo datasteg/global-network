@@ -1,0 +1,104 @@
+# Shock replays (Shocks > shock replay), read by scripts/shocks.py at build time.
+#
+# One entry per replay. The event itself (title, dek, dates, ongoing, sources) comes from trade-flow's
+# config/events.yaml by `id`; this file only says how to replay it. Adding a third replay = adding an entry here
+# (and nothing in the app).
+#
+#   t0        the event month (YYYY-MM); the timeline runs t0+from .. t0+to months
+#   base      the month whose 12-month window picks the waves (before the shock, never January: trade-flow's monthly rule)
+#   origins   wave 1: the economies where the shock starts
+#   wave1     products of the origins' exports that are highlighted (trade-flow slugs; summed, they must not overlap)
+#   wave2     direct importers: the largest buyers of wave1 from the origins in the base window, kept if the origins
+#             held at least `min_share` of the buyer's imports of wave1 products; at most `n`
+#   wave3     third markets: where the wave-2 economies sell `products` (base window), origins and wave-2 economies
+#             left out, the `n` largest by value; each wave-2 economy is drawn to its `per` largest of them
+#   summary   the year whose current-account quadrant labels the summary table (How economies earn)
+#
+# Everything shown is observed data: the waves are a reading of who traded with whom before the shock, not a
+# claim that the shock caused each later change.
+
+replays:
+  - id: covid-2020
+    t0: 2020-03
+    from: -12
+    to: 18
+    base: 2019-12
+    origins: [CHN]
+    label: {en: "COVID-19, 2020", ko: "코로나19, 2020년"}
+    wave1:
+      products: [B-computers, B-smartphones, B-semiconductors]
+      label: {en: "Computers, phones and chips", ko: "컴퓨터, 휴대전화, 반도체"}
+    wave2: {n: 12, min_share: 0.10}
+    wave3:
+      products: [TOTAL]
+      label: {en: "All goods", ko: "전체 상품"}
+      n: 10
+      per: 3
+    summary: 2019
+    note:
+      en: "China's factories shut in late January and February 2020, before WHO called the pandemic on 11 March; the base window is the 12 months to December 2019."
+      ko: "중국 공장은 WHO가 3월 11일 팬데믹을 선언하기 전인 2020년 1월 말과 2월에 멈췄습니다. 기준 창은 2019년 12월까지 12개월입니다."
+
+  - id: iran-war-2026
+    t0: 2026-03
+    from: -12
+    to: 18
+    base: 2025-12
+    origins: [SAU, ARE, QAT, IRQ, KWT, IRN, OMN, BHR]
+    label: {en: "Strait of Hormuz, 2026", ko: "호르무즈 해협, 2026년"}
+    wave1:
+      products: [B-crude_oil, B-natural_gas, C-fertiliser-nitrogen]
+      label: {en: "Crude oil, natural gas and nitrogen fertiliser", ko: "원유, 천연가스, 질소비료"}
+    wave2: {n: 12, min_share: 0.10}
+    wave3:
+      products: [B-refined_oil, C-plastics-polymers]
+      label: {en: "Refined oil products and plastics", ko: "석유제품과 플라스틱"}
+      n: 10
+      per: 3
+    summary: 2025
+    note:
+      en: "The strikes came on 28 February 2026, so March is the first full month. The Gulf exporters do not file monthly with UN Comtrade: their flows are the importers' reports. China has filed no 2026 months, so its purchases are missing. Ongoing: the data stop at trade-flow's last shown month."
+      ko: "공습은 2026년 2월 28일이었으므로 3월이 첫 온전한 달입니다. 걸프 수출국은 UN Comtrade에 월간 자료를 보고하지 않아 그 흐름은 수입국의 신고로 파악합니다. 중국은 2026년 월간 자료를 하나도 보고하지 않아 중국의 구매는 빠져 있습니다. 진행 중인 사건이라 자료는 trade-flow가 공개한 마지막 달에서 멈춥니다."
+
+  # trade-flow's product windows (B-*, C-*) begin in 2014; the 2008 replay therefore runs on all goods in every wave.
+  - id: gfc-2008
+    t0: 2008-09
+    from: -12
+    to: 18
+    base: 2008-06
+    origins: [USA]
+    label: {en: "Lehman and the trade collapse, 2008", ko: "리먼 파산과 무역 급감, 2008년"}
+    wave1:
+      products: [TOTAL]
+      label: {en: "All goods", ko: "전체 상품"}
+    wave2: {n: 12, min_share: 0.10}
+    wave3:
+      products: [TOTAL]
+      label: {en: "All goods", ko: "전체 상품"}
+      n: 10
+      per: 3
+    summary: 2007
+    note:
+      en: "Lehman Brothers failed on 15 September 2008, so September is the event month; the base window is the 12 months to June 2008. trade-flow's product windows begin in 2014, so every wave here is all goods: the United States' purchases from its suppliers (wave 2) and their sales to third markets (wave 3)."
+      ko: "리먼 브라더스는 2008년 9월 15일 파산했으므로 9월이 사건 월입니다. 기준 창은 2008년 6월까지 12개월입니다. trade-flow의 품목별 창은 2014년부터 있어 여기서는 모든 파동을 전체 상품으로 봅니다. 2파는 미국에 가장 많이 수출한 공급국, 3파는 그 공급국의 제3국 수출 시장입니다."
+
+  - id: russia-ukraine-2022
+    t0: 2022-02
+    from: -12
+    to: 18
+    base: 2021-11
+    origins: [RUS]
+    label: {en: "Russia’s invasion of Ukraine, 2022", ko: "러시아의 우크라이나 침공, 2022년"}
+    wave1:
+      products: [B-crude_oil, B-natural_gas, B-wheat, B-fertilisers]
+      label: {en: "Crude oil, natural gas, wheat and fertilisers", ko: "원유, 천연가스, 밀, 비료"}
+    wave2: {n: 12, min_share: 0.10}
+    wave3:
+      products: [B-refined_oil]
+      label: {en: "Refined oil products", ko: "석유제품"}
+      n: 10
+      per: 3
+    summary: 2021
+    note:
+      en: "The invasion came on 24 February 2022; the base window is the 12 months to November 2021. Russia stopped filing with UN Comtrade after December 2021, so every Russian flow from 2022 on is its partners' report (trade-flow marks them). Wave 1 is what Russia sold before the war (oil, gas, wheat, fertilisers); wave 3 follows the buyers' refined-oil exports, the event's third product, to third markets."
+      ko: "침공은 2022년 2월 24일에 일어났습니다. 기준 창은 2021년 11월까지 12개월입니다. 러시아는 2021년 12월 이후 UN Comtrade에 신고하지 않았습니다. 그래서 2022년부터의 러시아 흐름은 모두 상대국 신고입니다(trade-flow가 표시합니다). 1파는 전쟁 전 러시아가 수출하던 원유·가스·밀·비료입니다. 3파는 수입국들이 제3국에 수출하는 석유제품으로, 이 사건의 세 번째 품목입니다."

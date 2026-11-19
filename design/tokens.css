@@ -1,0 +1,105 @@
+/* Oreum — the global-network design system. Jeju island: basalt ink, the island's sea for money, tangerine for
+   trade, oreum green and camellia red for good and bad, canola yellow for a highlight, Hyeopjae sand for the page.
+   Two themes: Morning (light) and Night (dark). Every colour on the site is one of these tokens. */
+:root {
+  /* identity */
+  --basalt: #1C1F21;        /* porous volcanic rock: ink by day, the page by night */
+  --sand: #F5F2EA;          /* Hyeopjae sand: the page by day */
+  --sea: #0B6B86;           /* the sea off Seongsan: THE money colour, the action fill by day */
+  --sea-lit: #4FB3CF;       /* the same sea at dusk: money and actions by night */
+  --tangerine: #E07B22;     /* 감귤: THE trade colour */
+  --oreum: #3E7A4A;         /* grass on an oreum: good, pass, inflow */
+  --camellia: #B5333B;      /* 동백: bad, fail, withdrawal */
+  --canola: #E9C23A;        /* 유채: highlight, selected period, warning */
+
+  /* surfaces */
+  --surface: var(--sand);
+  --surface-raised: #FCFBF7;
+  --surface-sunk: #ECE8DD;
+  --line: #D8D3C6;
+  --line-strong: #B4AE9F;
+
+  /* ink */
+  --ink: var(--basalt);
+  --ink-2: #4B5154;
+  --ink-3: #6F7679;
+  --ink-inverse: var(--sand);
+
+  /* roles */
+  --accent: var(--sea);
+  --accent-hover: #095A72;
+  --on-accent: #FFFFFF;
+  --link: #085A72;
+  --focus: #0B6B86;
+
+  --money: var(--sea);
+  --money-text: #085A72;
+  --money-soft: #DCEEF3;
+  --trade: var(--tangerine);
+  --trade-text: #9A4E0C;
+  --trade-soft: #FBE8D6;
+  --good: var(--oreum);
+  --good-soft: #DDEDE0;
+  --bad: var(--camellia);
+  --bad-soft: #F6DEDF;
+  --warn: #A8650C;
+  --warn-soft: #FAEFD0;
+  --highlight: var(--canola);
+
+  /* charts */
+  --viz-axis: #B4AE9F;
+  --viz-grid: #E4DFD3;
+  --viz-context: #C9C3B4;
+  --viz-band: rgba(233, 194, 58, 0.22);
+  --viz-money: var(--sea);
+  --viz-trade: var(--tangerine);
+  --viz-money-2: #7FB5C6;
+  --viz-trade-2: #F0B27A;
+  /* diverging, net position: debtor clay, neutral sand-grey, creditor sea (not the status reds) */
+  --viz-div-0: #8E3F2B; --viz-div-1: #D4A08C; --viz-div-2: #CFCAC0; --viz-div-3: #8DBDCD; --viz-div-4: #0B6B86;
+
+  /* type */
+  --font-display: "Hahmlet Variable", "Hahmlet", "Noto Serif KR", Georgia, serif;
+  --font-sans: "IBM Plex Sans KR", "IBM Plex Sans", "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono: "Source Code Pro", "SFMono-Regular", Menlo, Consolas, monospace;
+
+  /* measure */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 48px;
+  --radius-xs: 2px; --radius-sm: 4px; --radius-md: 6px; --radius-pill: 999px;
+  --control-height: 36px;
+  --header-height: 56px;
+  --measure: 68ch;
+  --shadow-float: 0 8px 24px rgba(28, 31, 33, 0.12);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --surface: #141719; --surface-raised: #1C2023; --surface-sunk: #0E1113;
+    --line: #2C3236; --line-strong: #434B50;
+    --ink: #E8E6DF; --ink-2: #B8BCB9; --ink-3: #8C9397; --ink-inverse: #141719;
+    --accent: var(--sea-lit); --accent-hover: #6CC3DB; --on-accent: #0E1113; --link: #7CC9DF; --focus: #4FB3CF;
+    --money: var(--sea-lit); --money-text: #7CC9DF; --money-soft: #10303A;
+    --trade: #F09A4A; --trade-text: #F4B06E; --trade-soft: #3A2410;
+    --good: #7FC08C; --good-soft: #17301D; --bad: #F08086; --bad-soft: #3A1518; --warn: #F0B860; --warn-soft: #332810; --highlight: #F0D060;
+    --viz-axis: #434B50; --viz-grid: #262C30; --viz-context: #3A4247; --viz-band: rgba(240, 208, 96, 0.18);
+    --viz-money: var(--sea-lit); --viz-trade: #F09A4A; --viz-money-2: #2F7A91; --viz-trade-2: #A3622A;
+    --viz-div-0: #E39A82; --viz-div-1: #8C5747; --viz-div-2: #4C5458; --viz-div-3: #2F7A91; --viz-div-4: #5FC0DA;
+    --shadow-float: 0 8px 24px rgba(0, 0, 0, 0.5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --surface: #141719; --surface-raised: #1C2023; --surface-sunk: #0E1113;
+  --line: #2C3236; --line-strong: #434B50;
+  --ink: #E8E6DF; --ink-2: #B8BCB9; --ink-3: #8C9397; --ink-inverse: #141719;
+  --accent: var(--sea-lit); --accent-hover: #6CC3DB; --on-accent: #0E1113; --link: #7CC9DF; --focus: #4FB3CF;
+  --money: var(--sea-lit); --money-text: #7CC9DF; --money-soft: #10303A;
+  --trade: #F09A4A; --trade-text: #F4B06E; --trade-soft: #3A2410;
+  --good: #7FC08C; --good-soft: #17301D; --bad: #F08086; --bad-soft: #3A1518; --warn: #F0B860; --warn-soft: #332810; --highlight: #F0D060;
+  --viz-axis: #434B50; --viz-grid: #262C30; --viz-context: #3A4247; --viz-band: rgba(240, 208, 96, 0.18);
+  --viz-money: var(--sea-lit); --viz-trade: #F09A4A; --viz-money-2: #2F7A91; --viz-trade-2: #A3622A;
+    --viz-div-0: #E39A82; --viz-div-1: #8C5747; --viz-div-2: #4C5458; --viz-div-3: #2F7A91; --viz-div-4: #5FC0DA;
+  --shadow-float: 0 8px 24px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
